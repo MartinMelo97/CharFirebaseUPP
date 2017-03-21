@@ -16,7 +16,8 @@
             <p>ChatUPP</p>
         </a>
     </nav>
-    <div class="container-fluid">
+    <button id="facebook">Inicia sesión con Facebook para entrar al chat!</button>
+    <div class="container-fluid" id="contenedor-base">
         <div class="row">
             <div class="col-lg-12 col-md-12 col-sm-12 col-xs 12">
                     <div class="panel panel-default">
@@ -74,10 +75,33 @@
     <script>
         var db = firebase.database();
 
+
         $(document).ready(function(){
+            $('#contenedor-base').css({'display':'none'});
             db.ref('mensajes').on('child_added', function(data){
                 $('#box').append('<li class="list-group-item">'+data.val().mensaje+'</li>')
             });
+        });
+
+        $('#facebook').on('click', function(){
+            var provider = new firebase.auth.FacebookAuthProvider();
+            firebase.auth().signInWithPopup(provider).then(function(result){
+                var token = result.credential.accessToken;
+                var user = result.user
+            });
+        });
+
+        firebase.auth().onAuthStateChanged(function(user){
+            if(user){
+                $('#facebook').fadeOut();
+                $('#contenedor-base').fadeIn();
+                var nombre = user.displayName;
+                var correo = user.email;
+                var img = user.photoURL;
+                console.log(nombre);
+                console.log(correo);
+                console.log(img);
+            }
         });
 
         $('#enviar').on('click', function(){
