@@ -8,13 +8,55 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
     <style>
         body { padding-bottom: 70px; }
+
+        #img_user {
+            width: 50px;
+            height: 50px;
+            border-radius: 25px;
+            margin-right: 10px;
+        }
+
+        .img_chat{
+            width: 35px;
+            height: 35px;
+            border-radius: 18px;
+            margin-right: 10px;
+        }
+
+        .datos_user{
+            display: none;
+            text-align: right;
+        }
+
+        a, a:hover, a:active, a:focus, a:visited{
+            color: white;
+            text-decoration: none;
+        }
+
     </style>
 </head>
 <body>
     <nav class="navbar navbar-inverse">
-        <a href="#" class="navbar-brand" style="color: white;">
-            <p>ChatUPP</p>
-        </a>
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-3 col md-3 col-sm-6 col-xs-6">
+                    <a href="#" class="navbar-brand" style="color: white;">
+                         <p>ChatUPP</p>
+                    </a>
+                </div>
+                <div class="col-lg-9 col md-9 col-sm-6 col-xs-6">
+                    <div class="datos_user">
+                        <img src="" alt="" id="img_user">
+                        <span class="droptown" style="color: white;">
+                             <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><span id="name_user"></span>&nbsp;<span class="caret"></span></a>                            
+                                <ul class="dropdown-menu dropdown-menu-right">
+                                    <li id="logout"><a role="button" href="#">Cerrar sesión</a></li>
+                                </ul>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
     </nav>
     <button id="facebook">Inicia sesión con Facebook para entrar al chat!</button>
     <div class="container-fluid" id="contenedor-base">
@@ -40,14 +82,6 @@
             
         </div>
     </div>
-    <nav class="navbar navbar-inverse navbar-fixed-bottom">
-  <div class="container">
-    <a href="#" class="navbar-brand" style="color: white;">
-            <p>Mira mamá, mi chat con Firebase</p>
-        </a>
-  </div>
-</nav>
-
     <!-- Scripts de JQuery y Firebase -->
     <script
     src="https://code.jquery.com/jquery-3.2.1.js"
@@ -78,9 +112,6 @@
 
         $(document).ready(function(){
             $('#contenedor-base').css({'display':'none'});
-            db.ref('mensajes').on('child_added', function(data){
-                $('#box').append('<li class="list-group-item">'+data.val().mensaje+'</li>')
-            });
         });
 
         $('#facebook').on('click', function(){
@@ -95,21 +126,39 @@
             if(user){
                 $('#facebook').fadeOut();
                 $('#contenedor-base').fadeIn();
+                $('.datos_user').fadeIn();
+                db.ref('mensajes').on('child_added', function(data){
+                $('#box').append('<li class="list-group-item"><img class="img_chat" src="'+data.val().img+'">'+data.val().mensaje+' - Enviado por: '+data.val().nombre+'</li>')
+            });
                 var nombre = user.displayName;
-                var correo = user.email;
                 var img = user.photoURL;
                 console.log(nombre);
-                console.log(correo);
-                console.log(img);
+                $('#img_user').attr({'src':img});
+                $('#name_user').text(nombre); 
+            }
+            else{
+                $('#facebook').fadeIn();
+                $('#contenedor-base').fadeOut();
+                $('.datos_user').fadeOut();
             }
         });
 
         $('#enviar').on('click', function(){
             var mensaje = $('#cuerpo').val();
             db.ref('mensajes').push({
-                mensaje: mensaje
+                mensaje: mensaje,
+                nombre: $('#name_user').text(),
+                img: $('#img_user').attr('src'),
             });
             $('#cuerpo').val('');
+        });
+
+        $('#logout').on('click', function(){
+            firebase.auth().signOut().then(function(){
+                $('#img_user').attr({'src':''});
+                $('#nombre_user').text('');
+                $('#box').text('');
+            });
         });
     </script>
 </body>
